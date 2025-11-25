@@ -1,0 +1,197 @@
+// const Hero = require("../models/Hero");
+// const cloudinary = require("../config/cloudinary");
+// const ErrorResponse = require("../utils/errorResponse");
+
+// // // In controller
+// // if (!product) {
+// //   return next(new ErrorResponse("Product not found", 404));
+// // }
+
+// // exports.getHero = async (req, res) => {
+// //   const hero = await Hero.findOne();
+// //   res.json(hero);
+// // };
+
+
+// exports.getHero = async (req, res) => {
+//   try {
+//     const hero = await Hero.findOne();
+    
+//     if (!hero) {
+//       return res.status(404).json({ message: "Hero content not found" });
+//     }
+    
+//     res.json(hero);
+//   } catch (err) {
+//     res.status(500).json({ message: "Error fetching hero", error: err.message });
+//   }
+// };
+
+// // exports.updateHero = async (req, res) => {
+// //   try {
+// //     const existing = await Hero.findOne();
+// //     let backgroundUrl = existing?.backgroundUrl || "";
+
+// //     if (req.file) {
+// //       const uploaded = await cloudinary.uploader.upload(req.file.path, {
+// //         folder: "hero"
+// //       });
+// //       backgroundUrl = uploaded.secure_url;
+// //     }
+
+// //     const updated = await Hero.findOneAndUpdate(
+// //       {},
+// //       {
+// //         title: req.body.title,
+// //         subtitle: req.body.subtitle,
+// //         backgroundUrl: backgroundUrl,
+// //         buttonText: req.body.buttonText,
+// //         buttonLink: req.body.buttonLink
+// //       },
+// //       { new: true, upsert: true }
+// //     );
+
+// //     res.json({
+// //       message: "Hero updated successfully",
+// //       data: updated
+// //     });
+// //   } catch (err) {
+// //     res.status(500).json({ message: err.message });
+// //   }
+// // };
+
+// exports.updateHero = async (req, res) => {
+//   try {
+//     let backgroundUrl;
+
+//     if (req.file) {
+//       const uploaded = await cloudinary.uploader.upload(req.file.path);
+//       backgroundUrl = uploaded.secure_url;
+//     }
+
+//     const updated = await Hero.findOneAndUpdate(
+//       {},
+//       {
+//         title: req.body.title,
+//         subtitle: req.body.subtitle,
+//         backgroundUrl: backgroundUrl,
+//         buttonText: req.body.buttonText,
+//         buttonLink: req.body.buttonLink
+//       },
+//       { new: true, upsert: true }
+//     );
+
+//     res.json(updated);
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
+
+
+
+
+
+
+
+
+
+
+const Hero = require("../models/Hero");
+const cloudinary = require("../config/cloudinary");
+
+
+// GET HERO SLIDES
+exports.getHero = async (req, res) => {
+  try {
+    let hero = await Hero.findOne();
+
+    // If no data → create empty record
+    if (!hero) {
+      hero = await Hero.create({ slides: [] });
+    }
+
+    res.json(hero.slides);
+
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching hero", error: err.message });
+  }
+};
+
+
+// ADD SLIDE (Admin)
+exports.addSlide = async (req, res) => {
+  try {
+    let hero = await Hero.findOne() || await Hero.create({ slides: [] });
+
+    let imageUrl = "";
+    if (req.file) {
+      const upload = await cloudinary.uploader.upload(req.file.path, {
+        folder: "hero_slides"
+      });
+      imageUrl = upload.secure_url;
+    }
+
+    const newSlide = {
+      category: req.body.category,
+      title: req.body.title,
+      description: req.body.description,
+      image: imageUrl
+    };
+
+    hero.slides.push(newSlide);
+    await hero.save();
+
+    res.json({ message: "Slide added", slides: hero.slides });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+// UPDATE SLIDE
+exports.updateSlide = async (req, res) => {
+  try {
+    const hero = await Hero.findOne();
+    if (!hero) return res.status(404).json({ message: "Hero not found" });
+
+    const slide = hero.slides.id(req.params.id);
+    if (!slide) return res.status(404).json({ message: "Slide not found" });
+
+    if (req.file) {
+      const upload = await cloudinary.uploader.upload(req.file.path, {
+        folder: "hero_slides"
+      });
+      slide.image = upload.secure_url;
+    }
+
+    slide.category = req.body.category || slide.category;
+    slide.title = req.body.title || slide.title;
+    slide.description = req.body.description || slide.description;
+
+    await hero.save();
+
+    res.json({ message: "Slide updated", slides: hero.slides });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+// DELETE SLIDE
+exports.deleteSlide = async (req, res) => {
+  try {
+    const hero = await Hero.findOne();
+    if (!hero) return res.status(404).json({ message: "Hero not found" });
+
+    hero.slides = hero.slides.filter(s => s._id.toString() !== req.params.id);
+    await hero.save();
+
+    res.json({ message: "Slide deleted", slides: hero.slides });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
