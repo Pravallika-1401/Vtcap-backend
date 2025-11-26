@@ -277,10 +277,53 @@ const ErrorResponse = require("../utils/errorResponse");
 //   return next(new ErrorResponse("Product not found", 404));
 // }
 
+// exports.createBrand = async (req, res) => {
+//   try {
+//     let heroImage = "";
+
+//     if (req.file) {
+//       const uploaded = await cloudinary.uploader.upload(req.file.path, {
+//         folder: "brands"
+//       });
+//       heroImage = uploaded.secure_url;
+//     }
+
+//     const brand = await Brand.create({
+//       name: req.body.name,
+//       slug: req.body.slug,
+//       heroImage,
+//       aboutText: req.body.aboutText,
+//       offerText: req.body.offerText,
+//       products: req.body.products || [],
+//     });
+
+//     res.status(201).json({
+//       message: "Brand created successfully",
+//       data: brand
+//     });
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
 exports.createBrand = async (req, res) => {
   try {
-    let heroImage = "";
+    // ✅ VALIDATION
+    if (!req.body.name || !req.body.slug) {
+      return res.status(400).json({ 
+        message: "Name and slug are required" 
+      });
+    }
 
+    // ✅ CHECK DUPLICATE SLUG
+    const existingBrand = await Brand.findOne({ slug: req.body.slug });
+    if (existingBrand) {
+      return res.status(400).json({ 
+        message: "Brand with this slug already exists" 
+      });
+    }
+
+    let heroImage = "";
     if (req.file) {
       const uploaded = await cloudinary.uploader.upload(req.file.path, {
         folder: "brands"
@@ -292,8 +335,8 @@ exports.createBrand = async (req, res) => {
       name: req.body.name,
       slug: req.body.slug,
       heroImage,
-      aboutText: req.body.aboutText,
-      offerText: req.body.offerText,
+      aboutText: req.body.aboutText || "",
+      offerText: req.body.offerText || "",
       products: req.body.products || [],
     });
 

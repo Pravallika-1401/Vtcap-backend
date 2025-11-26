@@ -137,22 +137,53 @@
 
 
 
+// const mongoose = require("mongoose");
+
+// const brandCardSchema = new mongoose.Schema({
+//   name: { 
+//     type: String, 
+//     required: true,
+//     trim: true
+//   },
+//   image: { 
+//     type: String, 
+//     required: true 
+//   },
+//   products: {
+//     type: [String],       // Array of product names (strings)
+//     required: true
+//   }
+// }, { timestamps: true });
+
+// // module.exports = mongoose.model("BrandCard", brandCardSchema);
+// module.exports = mongoose.model("Product", productSchema); // Match with controller import
+
+
+
+
+
 const mongoose = require("mongoose");
 
-const brandCardSchema = new mongoose.Schema({
+const productSchema = new mongoose.Schema({
   name: { 
     type: String, 
-    required: true,
+    required: [true, "Brand name is required"],
     trim: true
   },
   image: { 
     type: String, 
-    required: true 
+    required: [true, "Brand image is required"]
   },
   products: {
-    type: [String],       // Array of product names (strings)
-    required: true
+    type: [String],
+    required: [true, "Products list is required"],
+    validate: {
+      validator: function(v) {
+        return Array.isArray(v) && v.length > 0;
+      },
+      message: "Products array cannot be empty"
+    }
   }
 }, { timestamps: true });
 
-module.exports = mongoose.model("BrandCard", brandCardSchema);
+module.exports = mongoose.model("Product", productSchema);

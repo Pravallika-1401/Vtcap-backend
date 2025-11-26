@@ -150,25 +150,51 @@ exports.updateAboutHome = async (req, res) => {
 
 
 // ADD TRUSTED BY LOGO
+// exports.addTrustedLogo = async (req, res) => {
+//   try {
+//     let about = await AboutHome.findOne() || await AboutHome.create({});
+    
+//     let logoUrl = "";
+//     if (req.file) {
+//       const upload = await cloudinary.uploader.upload(req.file.path, {
+//         folder: "trusted-logos"
+//       });
+//       logoUrl = upload.secure_url;
+//     }
+
+//     about.trustedLogos.push({
+//       name: req.body.name || "",
+//       logoUrl
+//     });
+
+//     await about.save();
+
+//     res.json({ message: "Trusted logo added", data: about.trustedLogos });
+
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
 exports.addTrustedLogo = async (req, res) => {
   try {
-    let about = await AboutHome.findOne() || await AboutHome.create({});
-    
-    let logoUrl = "";
-    if (req.file) {
-      const upload = await cloudinary.uploader.upload(req.file.path, {
-        folder: "trusted-logos"
-      });
-      logoUrl = upload.secure_url;
+    // ✅ FILE VALIDATION
+    if (!req.file) {
+      return res.status(400).json({ message: "Logo image is required" });
     }
 
+    let about = await AboutHome.findOne() || await AboutHome.create({});
+    
+    const upload = await cloudinary.uploader.upload(req.file.path, {
+      folder: "trusted-logos"
+    });
+
     about.trustedLogos.push({
-      name: req.body.name || "",
-      logoUrl
+      name: req.body.name || "Trusted Partner",
+      logoUrl: upload.secure_url
     });
 
     await about.save();
-
     res.json({ message: "Trusted logo added", data: about.trustedLogos });
 
   } catch (err) {
@@ -198,25 +224,51 @@ exports.deleteTrustedLogo = async (req, res) => {
 
 
 // ADD AUTHORIZED LOGO
+// exports.addAuthorizedLogo = async (req, res) => {
+//   try {
+//     let about = await AboutHome.findOne() || await AboutHome.create({});
+
+//     let logoUrl = "";
+//     if (req.file) {
+//       const upload = await cloudinary.uploader.upload(req.file.path, {
+//         folder: "authorized-logos"
+//       });
+//       logoUrl = upload.secure_url;
+//     }
+
+//     about.authorizedLogos.push({
+//       name: req.body.name || "",
+//       logoUrl
+//     });
+
+//     await about.save();
+
+//     res.json({ message: "Authorized logo added", data: about.authorizedLogos });
+
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
 exports.addAuthorizedLogo = async (req, res) => {
   try {
-    let about = await AboutHome.findOne() || await AboutHome.create({});
-
-    let logoUrl = "";
-    if (req.file) {
-      const upload = await cloudinary.uploader.upload(req.file.path, {
-        folder: "authorized-logos"
-      });
-      logoUrl = upload.secure_url;
+    // ✅ FILE VALIDATION
+    if (!req.file) {
+      return res.status(400).json({ message: "Logo image is required" });
     }
 
+    let about = await AboutHome.findOne() || await AboutHome.create({});
+
+    const upload = await cloudinary.uploader.upload(req.file.path, {
+      folder: "authorized-logos"
+    });
+
     about.authorizedLogos.push({
-      name: req.body.name || "",
-      logoUrl
+      name: req.body.name || "Authorized Dealer",
+      logoUrl: upload.secure_url
     });
 
     await about.save();
-
     res.json({ message: "Authorized logo added", data: about.authorizedLogos });
 
   } catch (err) {

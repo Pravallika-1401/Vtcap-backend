@@ -120,35 +120,68 @@ exports.getHero = async (req, res) => {
 
 
 // ADD SLIDE (Admin)
+// exports.addSlide = async (req, res) => {
+//   try {
+//     let hero = await Hero.findOne() || await Hero.create({ slides: [] });
+
+//     let imageUrl = "";
+//     if (req.file) {
+//       const upload = await cloudinary.uploader.upload(req.file.path, {
+//         folder: "hero_slides"
+//       });
+//       imageUrl = upload.secure_url;
+//     }
+
+//     const newSlide = {
+//       category: req.body.category,
+//       title: req.body.title,
+//       description: req.body.description,
+//       image: imageUrl
+//     };
+
+//     hero.slides.push(newSlide);
+//     await hero.save();
+
+//     res.json({ message: "Slide added", slides: hero.slides });
+
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
 exports.addSlide = async (req, res) => {
   try {
-    let hero = await Hero.findOne() || await Hero.create({ slides: [] });
-
-    let imageUrl = "";
-    if (req.file) {
-      const upload = await cloudinary.uploader.upload(req.file.path, {
-        folder: "hero_slides"
-      });
-      imageUrl = upload.secure_url;
+    // ✅ VALIDATIONS
+    if (!req.file) {
+      return res.status(400).json({ message: "Slide image is required" });
     }
 
-    const newSlide = {
+    if (!req.body.title || !req.body.category) {
+      return res.status(400).json({ 
+        message: "Title and category are required" 
+      });
+    }
+
+    let hero = await Hero.findOne() || await Hero.create({ slides: [] });
+
+    const upload = await cloudinary.uploader.upload(req.file.path, {
+      folder: "hero_slides"
+    });
+
+    hero.slides.push({
       category: req.body.category,
       title: req.body.title,
-      description: req.body.description,
-      image: imageUrl
-    };
+      description: req.body.description || "",
+      image: upload.secure_url
+    });
 
-    hero.slides.push(newSlide);
     await hero.save();
-
     res.json({ message: "Slide added", slides: hero.slides });
 
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
-
 
 // UPDATE SLIDE
 exports.updateSlide = async (req, res) => {
@@ -195,3 +228,24 @@ exports.deleteSlide = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+// exports.getHeroAdmin = async (req, res) => {
+//   try {
+//     let hero = await Hero.findOne();
+//     if (!hero) hero = await Hero.create({ slides: [] });
+//     res.json(hero);  // full object send to admin
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
+exports.getHeroAdmin = async (req, res) => {
+  try {
+    let hero = await Hero.findOne();
+    if (!hero) hero = await Hero.create({ slides: [] });
+    res.json(hero);  // SLIDES array inside hero object
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+

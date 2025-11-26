@@ -438,13 +438,137 @@
 
 
 
-const BrandCard = require("../models/Product");
+// const BrandCard = require("../models/Product");
+// const cloudinary = require("../config/cloudinary");
+
+// // GET ALL BRAND CARDS
+// exports.getBrands = async (req, res) => {
+//   try {
+//     const brands = await BrandCard.find().sort({ createdAt: -1 });
+//     res.json(brands);
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
+// // CREATE BRAND CARD
+// // exports.createBrand = async (req, res) => {
+// //   try {
+// //     let imgUrl = "";
+
+// //     if (req.file) {
+// //       const upload = await cloudinary.uploader.upload(req.file.path, {
+// //         folder: "brand-cards"
+// //       });
+// //       imgUrl = upload.secure_url;
+// //     }
+
+// //     const brand = await BrandCard.create({
+// //       name: req.body.name,
+// //       image: imgUrl,
+// //       products: JSON.parse(req.body.products) // Array
+// //     });
+
+// //     res.json({ message: "Brand created", brand });
+
+// //   } catch (err) {
+// //     res.status(500).json({ message: err.message });
+// //   }
+// // };
+// exports.createBrand = async (req, res) => {
+//   try {
+//     // ✅ ADD VALIDATIONS
+//     if (!req.body.name) {
+//       return res.status(400).json({ message: "Brand name is required" });
+//     }
+
+//     if (!req.file) {
+//       return res.status(400).json({ message: "Brand image is required" });
+//     }
+
+//     if (!req.body.products) {
+//       return res.status(400).json({ message: "Products list is required" });
+//     }
+
+//     let products;
+//     try {
+//       products = JSON.parse(req.body.products);
+//       if (!Array.isArray(products) || products.length === 0) {
+//         return res.status(400).json({ message: "Products must be a non-empty array" });
+//       }
+//     } catch (err) {
+//       return res.status(400).json({ message: "Invalid products format" });
+//     }
+
+//     const upload = await cloudinary.uploader.upload(req.file.path, {
+//       folder: "brand-cards"
+//     });
+
+//     const brand = await Product.create({ // ← Changed from BrandCard
+//       name: req.body.name,
+//       image: upload.secure_url,
+//       products: products
+//     });
+
+//     res.json({ message: "Brand created", brand });
+
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
+// // UPDATE BRAND CARD
+// exports.updateBrand = async (req, res) => {
+//   try {
+//     const brand = await BrandCard.findById(req.params.id);
+//     if (!brand) return res.status(404).json({ message: "Not found" });
+
+//     let imgUrl = brand.image;
+
+//     if (req.file) {
+//       const upload = await cloudinary.uploader.upload(req.file.path, {
+//         folder: "brand-cards"
+//       });
+//       imgUrl = upload.secure_url;
+//     }
+
+//     brand.name = req.body.name || brand.name;
+//     brand.products = req.body.products ? JSON.parse(req.body.products) : brand.products;
+//     brand.image = imgUrl;
+
+//     await brand.save();
+
+//     res.json({ message: "Brand updated", brand });
+
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
+// // DELETE BRAND CARD
+// exports.deleteBrand = async (req, res) => {
+//   try {
+//     await BrandCard.findByIdAndDelete(req.params.id);
+//     res.json({ message: "Brand removed" });
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
+
+
+
+
+
+
+
+const Product = require("../models/Product"); // ✅ Changed from BrandCard
 const cloudinary = require("../config/cloudinary");
 
 // GET ALL BRAND CARDS
 exports.getBrands = async (req, res) => {
   try {
-    const brands = await BrandCard.find().sort({ createdAt: -1 });
+    const brands = await Product.find().sort({ createdAt: -1 });
     res.json(brands);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -454,22 +578,42 @@ exports.getBrands = async (req, res) => {
 // CREATE BRAND CARD
 exports.createBrand = async (req, res) => {
   try {
-    let imgUrl = "";
-
-    if (req.file) {
-      const upload = await cloudinary.uploader.upload(req.file.path, {
-        folder: "brand-cards"
-      });
-      imgUrl = upload.secure_url;
+    // ✅ VALIDATIONS
+    if (!req.body.name) {
+      return res.status(400).json({ message: "Brand name is required" });
     }
 
-    const brand = await BrandCard.create({
-      name: req.body.name,
-      image: imgUrl,
-      products: JSON.parse(req.body.products) // Array
+    if (!req.file) {
+      return res.status(400).json({ message: "Brand image is required" });
+    }
+
+    if (!req.body.products) {
+      return res.status(400).json({ message: "Products list is required" });
+    }
+
+    let products;
+    try {
+      products = JSON.parse(req.body.products);
+      if (!Array.isArray(products) || products.length === 0) {
+        return res.status(400).json({ 
+          message: "Products must be a non-empty array" 
+        });
+      }
+    } catch (err) {
+      return res.status(400).json({ message: "Invalid products format" });
+    }
+
+    const upload = await cloudinary.uploader.upload(req.file.path, {
+      folder: "brand-cards"
     });
 
-    res.json({ message: "Brand created", brand });
+    const brand = await Product.create({ // ✅ Now Product is defined
+      name: req.body.name,
+      image: upload.secure_url,
+      products: products
+    });
+
+    res.json({ message: "Brand created successfully", brand });
 
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -479,8 +623,11 @@ exports.createBrand = async (req, res) => {
 // UPDATE BRAND CARD
 exports.updateBrand = async (req, res) => {
   try {
-    const brand = await BrandCard.findById(req.params.id);
-    if (!brand) return res.status(404).json({ message: "Not found" });
+    const brand = await Product.findById(req.params.id); // ✅ Changed
+    
+    if (!brand) {
+      return res.status(404).json({ message: "Brand not found" });
+    }
 
     let imgUrl = brand.image;
 
@@ -492,12 +639,21 @@ exports.updateBrand = async (req, res) => {
     }
 
     brand.name = req.body.name || brand.name;
-    brand.products = req.body.products ? JSON.parse(req.body.products) : brand.products;
     brand.image = imgUrl;
+    
+    if (req.body.products) {
+      try {
+        const products = JSON.parse(req.body.products);
+        if (Array.isArray(products) && products.length > 0) {
+          brand.products = products;
+        }
+      } catch (err) {
+        return res.status(400).json({ message: "Invalid products format" });
+      }
+    }
 
     await brand.save();
-
-    res.json({ message: "Brand updated", brand });
+    res.json({ message: "Brand updated successfully", brand });
 
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -507,8 +663,13 @@ exports.updateBrand = async (req, res) => {
 // DELETE BRAND CARD
 exports.deleteBrand = async (req, res) => {
   try {
-    await BrandCard.findByIdAndDelete(req.params.id);
-    res.json({ message: "Brand removed" });
+    const brand = await Product.findByIdAndDelete(req.params.id); // ✅ Changed
+    
+    if (!brand) {
+      return res.status(404).json({ message: "Brand not found" });
+    }
+
+    res.json({ message: "Brand deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

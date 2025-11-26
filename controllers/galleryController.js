@@ -275,35 +275,72 @@ exports.getGallery = async (req, res) => {
   }
 };
 
-// ADD GALLERY IMAGE (Admin)
+
+
+// exports.createGalleryItem = async (req, res) => {
+//   try {
+//     // ✅ VALIDATIONS
+//     if (!req.file) {
+//       return res.status(400).json({ message: "Image is required" });
+//     }
+
+//     if (!req.body.title || !req.body.category) {
+//       return res.status(400).json({ 
+//         message: "Title and category are required" 
+//       });
+//     }
+
+//     const uploaded = await cloudinary.uploader.upload(req.file.path, {
+//       folder: "gallery"
+//     });
+
+//     const newItem = await Gallery.create({
+//       title: req.body.title,
+//       category: req.body.category,
+//       image: uploaded.secure_url
+//     });
+
+//     res.json({
+//       message: "Gallery item created successfully",
+//       data: newItem
+//     });
+
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
+// DELETE IMAGE
+
+
 exports.createGalleryItem = async (req, res) => {
   try {
-    let imageUrl = "";
-
-    if (req.file) {
-      const uploaded = await cloudinary.uploader.upload(req.file.path, {
-        folder: "gallery"
-      });
-      imageUrl = uploaded.secure_url;
+    if (!req.file) {
+      return res.status(400).json({ message: "Image is required" });
     }
 
     const newItem = await Gallery.create({
       title: req.body.title,
       category: req.body.category,
-      image: imageUrl
+      image: `/uploads/${req.file.filename}`   // 🔥 LOCAL IMAGE SAVE
     });
 
-    res.json({
+    res.status(201).json({
       message: "Gallery item created successfully",
       data: newItem
     });
 
   } catch (err) {
+    console.log(err);
     res.status(500).json({ message: err.message });
   }
 };
 
-// DELETE IMAGE
+
+
+
+
+
 exports.deleteGallery = async (req, res) => {
   try {
     const item = await Gallery.findById(req.params.id);
@@ -312,6 +349,28 @@ exports.deleteGallery = async (req, res) => {
     await Gallery.findByIdAndDelete(req.params.id);
 
     res.json({ message: "Gallery item deleted" });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// NEW: TOGGLE FEATURED
+exports.toggleFeatured = async (req, res) => {
+  try {
+    const item = await Gallery.findById(req.params.id);
+    if (!item) {
+      return res.status(404).json({ message: "Gallery item not found" });
+    }
+
+    // Toggle the boolean value
+    item.isFeatured = !item.isFeatured;
+    await item.save();
+
+    res.json({ 
+      message: "Featured status updated successfully",
+      isFeatured: item.isFeatured
+    });
 
   } catch (err) {
     res.status(500).json({ message: err.message });

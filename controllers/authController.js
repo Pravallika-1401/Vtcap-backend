@@ -25,27 +25,64 @@ const ErrorResponse = require("../utils/errorResponse");
 //   }
 // };
 
+// exports.registerAdmin = async (req, res) => {
+//   try {
+//     const { username, email, password } = req.body;
+
+//     if (!username || !email || !password) {
+//       return res.status(400).json({ message: "All fields are required" });
+//     }
+
+//     const adminExists = await Admin.findOne({ email });
+//     if (adminExists) return res.status(400).json({ message: "Admin already exists" });
+
+//     const hashed = await bcrypt.hash(password, 10);
+
+//     const admin = await Admin.create({ username, email, password: hashed });
+
+//     res.json(admin);
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
 exports.registerAdmin = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
+    // ✅ BASIC VALIDATION
     if (!username || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
+    // ✅ PASSWORD LENGTH CHECK
+    if (password.length < 6) {
+      return res.status(400).json({ 
+        message: "Password must be at least 6 characters long" 
+      });
+    }
+
+    // ✅ CHECK EXISTING ADMIN
     const adminExists = await Admin.findOne({ email });
-    if (adminExists) return res.status(400).json({ message: "Admin already exists" });
+    if (adminExists) {
+      return res.status(400).json({ message: "Admin already exists" });
+    }
 
     const hashed = await bcrypt.hash(password, 10);
-
     const admin = await Admin.create({ username, email, password: hashed });
 
-    res.json(admin);
+    res.json({ 
+      message: "Admin registered successfully",
+      admin: {
+        id: admin._id,
+        username: admin.username,
+        email: admin.email
+      }
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
-
 
 // exports.loginAdmin = async (req, res) => {
 //   try {
