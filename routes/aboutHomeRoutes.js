@@ -1,17 +1,3 @@
-// const express = require("express");
-// const router = express.Router();
-// const upload = require("../middleware/uploadMiddleware");
-// const protect = require("../middleware/authMiddleware");
-// const { getAboutHome, updateAboutHome } = require("../controllers/aboutHomeController");
-
-// router.get("/", getAboutHome);
-// router.put("/", protect, upload.single("image"), updateAboutHome);
-
-// module.exports = router;
-
-
-
-
 const express = require("express");
 const router = express.Router();
 const upload = require("../middleware/uploadMiddleware");

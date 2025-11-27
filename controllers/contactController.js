@@ -1,15 +1,7 @@
 const Contact = require("../models/Contact");
 const ErrorResponse = require("../utils/errorResponse");
 
-// // In controller
-// if (!product) {
-//   return next(new ErrorResponse("Product not found", 404));
-// }
 
-// exports.getContact = async (req, res) => {
-//   const contact = await Contact.findOne();
-//   res.json(contact);
-// };
 
 exports.getContact = async (req, res) => {
   try {
@@ -44,22 +36,7 @@ exports.updateContact = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-// exports.submitMessage = async (req, res) => {
-//   try {
-//     const { name, email, phone, message } = req.body;
 
-//     if (!name || !email || !phone || !message) {
-//       return res.status(400).json({ message: "All fields required" });
-//     }
-
-//     // In DB store or you can send email
-//     // For now, just return success
-//     res.json({ message: "Message received successfully" });
-
-//   } catch (err) {
-//     res.status(500).json({ message: "Server error", error: err.message });
-//   }
-// };
 exports.submitMessage = async (req, res) => {
   try {
     const { name, email, phone, message } = req.body;

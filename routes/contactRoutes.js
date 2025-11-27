@@ -1,17 +1,3 @@
-// const express = require("express");
-// const router = express.Router();
-// const protect = require("../middleware/authMiddleware");
-// const { getContact, updateContact } = require("../controllers/contactController");
-
-// router.get("/", getContact);
-// router.put("/", protect, updateContact);
-// router.post("/", submitMessage);
-
-
-// module.exports = router;
-
-
-
 const express = require("express");
 const router = express.Router();
 const protect = require("../middleware/authMiddleware");
